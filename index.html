@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spendlite — Personal Finance Tracker</title>
+    <meta name="description" content="Track expenses and income, see summaries, and analyze spending habits.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%231a2a3a'/%3E%3Cpath d='M30 55c0-12 10-22 22-22h8' stroke='%23ffffff' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='60' cy='33' r='6' fill='%23A3E635'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="parallax" aria-hidden="true">
+        <span class="p-layer p1"></span>
+        <span class="p-layer p2"></span>
+        <span class="p-layer p3"></span>
+      </div>
+      <div class="container header-inner">
+        <div class="brand">
+          <span class="logo" aria-hidden="true">💸</span>
+          <span class="title">Spendlite</span>
+        </div>
+        <nav class="nav">
+          <button id="addQuickIncome" class="btn btn-ghost" title="Quick add income" data-tilt>+ Income</button>
+          <button id="addQuickExpense" class="btn btn-primary" title="Quick add expense" data-tilt>+ Expense</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container main-grid" id="main">
+      <section class="panel panel-summary" aria-labelledby="summaryHeading">
+        <h2 id="summaryHeading" class="visually-hidden">Summary</h2>
+        <div class="cards">
+          <article class="card" aria-live="polite" data-tilt>
+            <div class="card-label">Income</div>
+            <div class="card-value" id="incomeTotal">$0.00</div>
+          </article>
+          <article class="card" aria-live="polite" data-tilt>
+            <div class="card-label">Expenses</div>
+            <div class="card-value negative" id="expenseTotal">$0.00</div>
+          </article>
+          <article class="card" aria-live="polite" data-tilt>
+            <div class="card-label">Balance</div>
+            <div class="card-value" id="balanceTotal">$0.00</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel panel-form" aria-labelledby="addHeading">
+        <h2 id="addHeading">Add Transaction</h2>
+        <form id="transactionForm" class="form" autocomplete="off">
+          <div class="form-row">
+            <label for="type">Type</label>
+            <select id="type" required>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="category">Category</label>
+            <input id="category" list="categoryList" placeholder="e.g., Groceries" required>
+            <datalist id="categoryList"></datalist>
+          </div>
+          <div class="form-row">
+            <label for="amount">Amount</label>
+            <input id="amount" type="number" step="0.01" min="0" placeholder="0.00" required>
+          </div>
+          <div class="form-row">
+            <label for="date">Date</label>
+            <input id="date" type="date" required>
+          </div>
+          <div class="form-row">
+            <label for="note">Notes</label>
+            <input id="note" type="text" maxlength="120" placeholder="Optional note">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="reset" class="btn btn-ghost">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel panel-filters" aria-labelledby="filterHeading">
+        <h2 id="filterHeading">Filter & Analyze</h2>
+        <div class="filters">
+          <div class="form-row">
+            <label for="filterType">Type</label>
+            <select id="filterType">
+              <option value="all">All</option>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="filterCategory">Category</label>
+            <input id="filterCategory" list="categoryList" placeholder="All categories">
+          </div>
+          <div class="form-row compact-dates">
+            <div>
+              <label for="startDate">From</label>
+              <input id="startDate" type="date">
+            </div>
+            <div>
+              <label for="endDate">To</label>
+              <input id="endDate" type="date">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="searchText">Search</label>
+            <input id="searchText" type="text" placeholder="Notes or category">
+          </div>
+          <div class="form-actions">
+            <button id="applyFilters" class="btn btn-ghost">Apply</button>
+            <button id="clearFilters" class="btn btn-ghost">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-charts" aria-labelledby="chartsHeading">
+        <h2 id="chartsHeading">Insights</h2>
+        <div class="charts-grid">
+          <figure class="chart-card" data-tilt>
+            <figcaption>Monthly Trend</figcaption>
+            <canvas id="trendChart" height="140"></canvas>
+          </figure>
+          <figure class="chart-card" data-tilt>
+            <figcaption>By Category</figcaption>
+            <canvas id="categoryChart" height="140"></canvas>
+          </figure>
+        </div>
+      </section>
+
+      <section class="panel panel-table" aria-labelledby="listHeading">
+        <div class="panel-head">
+          <h2 id="listHeading">Transactions</h2>
+          <div class="panel-actions">
+            <button id="exportCsv" class="btn btn-ghost">Export CSV</button>
+            <label class="btn btn-ghost file-btn">
+              Import CSV
+              <input id="importCsv" type="file" accept="text/csv">
+            </label>
+            <button id="loadSample" class="btn btn-ghost">Load Sample</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table" aria-describedby="listHeading">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Type</th>
+                <th scope="col">Category</th>
+                <th scope="col" class="right">Amount</th>
+                <th scope="col">Notes</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transactionTbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="editDialog">
+      <form method="dialog" id="editForm" class="form">
+        <h3>Edit Transaction</h3>
+        <input type="hidden" id="editId">
+        <div class="form-row">
+          <label for="editType">Type</label>
+          <select id="editType" required>
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="editCategory">Category</label>
+          <input id="editCategory" required>
+        </div>
+        <div class="form-row">
+          <label for="editAmount">Amount</label>
+          <input id="editAmount" type="number" step="0.01" min="0" required>
+        </div>
+        <div class="form-row">
+          <label for="editDate">Date</label>
+          <input id="editDate" type="date" required>
+        </div>
+        <div class="form-row">
+          <label for="editNote">Notes</label>
+          <input id="editNote" type="text" maxlength="120">
+        </div>
+        <div class="form-actions">
+          <button value="cancel" class="btn btn-ghost">Cancel</button>
+          <button id="saveEdit" value="default" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <footer class="app-footer">
+      <div class="container footer-inner">
+        <small>Spendlite · Your private, local finance tracker</small>
+        <small><a href="https://www.chartjs.org/" target="_blank" rel="noreferrer noopener">Charts by Chart.js</a></small>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-nP0JQwGQ8wQk1t6Q0m9J5f3Y0Sg8kQpQyq1sS7p2b1sFd2qfJk7oA5H7qfYx1mVV" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+  </body>
+  </html>
+
+
