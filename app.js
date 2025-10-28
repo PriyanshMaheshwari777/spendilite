@@ -16,7 +16,7 @@
   // Utils
   const formatCurrency = (num) => new Intl.NumberFormat(undefined, { style: 'currency', currency: guessCurrency() }).format(num || 0);
   const guessCurrency = () => {
-    try { return new Intl.NumberFormat().resolvedOptions().currency || 'USD'; } catch { return 'USD'; }
+    try { return new Intl.NumberFormat().resolvedOptions().currency || 'INR'; } catch { return 'INR'; }
   };
   const todayIso = () => new Date().toISOString().slice(0, 10);
   const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
